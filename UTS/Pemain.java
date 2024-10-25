@@ -1,150 +1,158 @@
-package UTS;
+package uts1;
+
+import java.util.ArrayList;
 
 public class Pemain {
-    String nama;
-    double uang;
-    int energi;
-    String[] inventoriAlat;
-    int[] jumlahTanaman; // Array untuk jumlah masing-masing tanaman
-    int[] inventoriTanaman; // Array untuk menyimpan jumlah inventori tanaman
-    String[] statusTanaman; // Menyimpan status tanaman yang ditanam
+    private int uang;
+    private ArrayList<Tanaman> inventoriTanaman;
+    private ArrayList<Tanaman> tanamanDitanam; // List for planted plants
+    private ArrayList<Tanaman> tanamanDipanen; // List for harvested plants
+    private ArrayList<Alat> inventoriAlat;
 
-    public Pemain(String nama) {
-        this.nama = nama;
-        this.uang = 0.0; // Uang awal diatur menjadi 0
-        this.energi = 100; // Energi awal
-        this.inventoriAlat = new String[]{"Cangkul", "Pupuk", "Penyiram Tanaman"};
-        this.jumlahTanaman = new int[3]; // Padi, Jagung, Sayuran
-        this.inventoriTanaman = new int[3]; // Padi, Jagung, Sayuran untuk inventori
-        this.statusTanaman = new String[3]; // Status tanaman (Ditanam atau Belum Ditanam)
+    public Pemain() {
+        this.uang = 500; // Start with 500 coins
+        this.inventoriTanaman = new ArrayList<>();
+        this.tanamanDitanam = new ArrayList<>(); // Initialize the list for planted plants
+        this.tanamanDipanen = new ArrayList<>(); // Initialize the list for harvested plants
+        this.inventoriAlat = new ArrayList<>();
+
+        // Adding tools to the inventory
+        inventoriAlat.add(new Alat("Cangkul", 50));
+        inventoriAlat.add(new Alat("Penyiram Tanaman", 30));
+        inventoriAlat.add(new Alat("Pupuk", 20));
+        inventoriAlat.add(new Alat("Pestisida", 40));
     }
 
-    public void kurangiEnergi(int jumlah) {
-        energi -= jumlah;
-        if (energi < 0) {
-            energi = 0;
+    public void beliTanaman(Toko toko, String nama) {
+        Tanaman tanaman = toko.beliTanaman(nama);
+        if (tanaman != null) {
+            System.out.println("Tanaman " + tanaman.getNama() + " seharga " + tanaman.getHarga() + " koin.");
+            if (uang >= tanaman.getHarga()) {
+                uang -= tanaman.getHarga();
+                inventoriTanaman.add(tanaman);
+                System.out.println("Anda telah membeli " + tanaman.getNama());
+            } else {
+                System.out.println("Uang tidak cukup untuk membeli " + tanaman.getNama());
+            }
+        } else {
+            System.out.println("Tanaman tidak ditemukan di toko.");
         }
     }
 
-    public void tambahUang(double jumlah) {
-        uang += jumlah;
-    }
-
-    public void panenTanaman(String namaTanaman, int jumlah) {
-        switch (namaTanaman.toLowerCase()) {
-            case "padi":
-                if (jumlahTanaman[0] >= jumlah) {
-                    jumlahTanaman[0] -= jumlah;
-                    inventoriTanaman[0] += jumlah; // Masukkan ke inventori setelah panen
-                    kurangiEnergi(jumlah); // Mengurangi energi sesuai jumlah panen
-                    System.out.println("Anda telah memanen " + jumlah + " Padi.");
-                } else {
-                    System.out.println("Jumlah Padi tidak cukup untuk dipanen.");
-                }
-                break;
-            case "jagung":
-                if (jumlahTanaman[1] >= jumlah) {
-                    jumlahTanaman[1] -= jumlah;
-                    inventoriTanaman[1] += jumlah; // Masukkan ke inventori setelah panen
-                    kurangiEnergi(jumlah); // Mengurangi energi sesuai jumlah panen
-                    System.out.println("Anda telah memanen " + jumlah + " Jagung.");
-                } else {
-                    System.out.println("Jumlah Jagung tidak cukup untuk dipanen.");
-                }
-                break;
-            case "sayuran":
-                if (jumlahTanaman[2] >= jumlah) {
-                    jumlahTanaman[2] -= jumlah;
-                    inventoriTanaman[2] += jumlah; // Masukkan ke inventori setelah panen
-                    kurangiEnergi(jumlah); // Mengurangi energi sesuai jumlah panen
-                    System.out.println("Anda telah memanen " + jumlah + " Sayuran.");
-                } else {
-                    System.out.println("Jumlah Sayuran tidak cukup untuk dipanen.");
-                }
-                break;
-            default:
-                System.out.println("Tanaman tidak dikenali.");
-                break;
+    public void tanamTanaman(Tanaman tanaman) {
+        if (inventoriTanaman.contains(tanaman)) {
+            inventoriTanaman.remove(tanaman); // Remove the plant from inventory after planting
+            tanamanDitanam.add(tanaman); // Add to the planted plants list
+            System.out.println("Anda telah menanam " + tanaman.getNama());
+        } else {
+            System.out.println("Tanaman tidak ada dalam inventori.");
         }
     }
 
-    public void tambahTanaman(String namaTanaman) {
-        if (namaTanaman.equalsIgnoreCase("Padi")) {
-            jumlahTanaman[0]++;
-            statusTanaman[0] = "Ditanam"; // Set status padi
-        } else if (namaTanaman.equalsIgnoreCase("Jagung")) {
-            jumlahTanaman[1]++;
-            statusTanaman[1] = "Ditanam"; // Set status jagung
-        } else if (namaTanaman.equalsIgnoreCase("Sayuran")) {
-            jumlahTanaman[2]++;
-            statusTanaman[2] = "Ditanam"; // Set status sayuran
+    public void panenTanaman(String nama) {
+        Tanaman tanamanUntukDipanen = null;
+
+        // Cari tanaman yang cocok di tanamanDitanam
+        for (Tanaman tanaman : tanamanDitanam) {
+            if (tanaman.getNama().equalsIgnoreCase(nama)) {
+                tanamanUntukDipanen = tanaman; // Mark the plant to be harvested
+                break;
+            }
+        }
+
+        // Jika ditemukan tanaman yang bisa dipanen
+        if (tanamanUntukDipanen != null) {
+            tanamanDipanen.add(tanamanUntukDipanen); // Add to harvested plants
+            tanamanDitanam.remove(tanamanUntukDipanen); // Remove from planted plants
+            System.out.println("Anda telah memanen " + tanamanUntukDipanen.getNama() + ". Tanaman sudah siap untuk dijual.");
+        } else {
+            System.out.println("Tanaman dengan nama " + nama + " tidak ditemukan di lahan.");
         }
     }
 
-    public void cekInventori() {
-        System.out.println("Inventori Tanaman:");
-        System.out.println("Padi: " + inventoriTanaman[0]);
-        System.out.println("Jagung: " + inventoriTanaman[1]);
-        System.out.println("Sayuran: " + inventoriTanaman[2]);
+    public void jualTanaman(String nama) {
+        Tanaman tanamanUntukDijual = null;
+
+        // Cek apakah tanaman ada di tanamanDipanen
+        for (Tanaman tanaman : tanamanDipanen) {
+            if (tanaman.getNama().equalsIgnoreCase(nama)) {
+                tanamanUntukDijual = tanaman; // Mark the plant to be sold
+                break;
+            }
+        }
+
+        if (tanamanUntukDijual != null) {
+            int hargaJual = tanamanUntukDijual.getHargaJual(); // Get the selling price
+            uang += hargaJual; // Add the selling price to the player's money
+            tanamanDipanen.remove(tanamanUntukDijual); // Remove the sold plant from the harvested list
+            System.out.println("Anda telah menjual " + tanamanUntukDijual.getNama() + " dan menerima " + hargaJual + " koin.");
+            System.out.println("Total koin Anda sekarang: " + uang + " koin."); // Show total money after selling
+        } else {
+            System.out.println("Tanaman dengan nama " + nama + " tidak ditemukan dalam daftar tanaman yang dipanen.");
+        }
     }
 
-    public void cekTanamanDitanam() {
-        System.out.println("Tanaman yang telah ditanam:");
-        for (int i = 0; i < statusTanaman.length; i++) {
-            if (statusTanaman[i] != null && statusTanaman[i].equals("Ditanam")) {
-                switch (i) {
-                    case 0:
-                        System.out.println("Padi: " + jumlahTanaman[0]);
-                        break;
-                    case 1:
-                        System.out.println("Jagung: " + jumlahTanaman[1]);
-                        break;
-                    case 2:
-                        System.out.println("Sayuran: " + jumlahTanaman[2]);
-                        break;
-                }
+    public void tampilkanTanamanDipanen() {
+        if (tanamanDipanen.isEmpty()) {
+            System.out.println("Tidak ada tanaman yang sudah dipanen.");
+        } else {
+            System.out.println("Tanaman yang sudah dipanen:");
+            for (Tanaman t : tanamanDipanen) {
+                System.out.println("- " + t.getNama());
             }
         }
     }
 
-    public void jualTanaman(String namaTanaman, int jumlah) {
-        switch (namaTanaman.toLowerCase()) {
-            case "padi":
-                if (inventoriTanaman[0] >= jumlah) {
-                    inventoriTanaman[0] -= jumlah;
-                    tambahUang(jumlah * 5); // Misalnya harga Padi 5
-                    System.out.println("Anda telah menjual " + jumlah + " Padi.");
-                } else {
-                    System.out.println("Jumlah Padi tidak cukup untuk dijual.");
-                }
-                break;
-            case "jagung":
-                if (inventoriTanaman[1] >= jumlah) {
-                    inventoriTanaman[1] -= jumlah;
-                    tambahUang(jumlah * 7); // Misalnya harga Jagung 7
-                    System.out.println("Anda telah menjual " + jumlah + " Jagung.");
-                } else {
-                    System.out.println("Jumlah Jagung tidak cukup untuk dijual.");
-                }
-                break;
-            case "sayuran":
-                if (inventoriTanaman[2] >= jumlah) {
-                    inventoriTanaman[2] -= jumlah;
-                    tambahUang(jumlah * 4); // Misalnya harga Sayuran 4
-                    System.out.println("Anda telah menjual " + jumlah + " Sayuran.");
-                } else {
-                    System.out.println("Jumlah Sayuran tidak cukup untuk dijual.");
-                }
-                break;
-            default:
-                System.out.println("Tanaman tidak dikenali.");
-                break;
+    public void tampilkanInventoriTanaman() {
+        if (inventoriTanaman.isEmpty()) {
+            System.out.println("Inventori tanaman kosong.");
+        } else {
+            System.out.println("Tanaman dalam inventori:");
+            for (Tanaman tanaman : inventoriTanaman) {
+                System.out.println("- " + tanaman.getNama());
+            }
         }
     }
 
-    public void lewatkanHari() {
-        // Mengembalikan energi pemain saat melewati hari
-        energi = 100; // Reset energi ke maksimum
-        System.out.println("Hari telah berlalu. Energi Anda telah di-refresh ke: " + energi);
+    public void tampilkanTanamanDitanam() { // Method to display planted plants
+        if (tanamanDitanam.isEmpty()) {
+            System.out.println("Belum ada tanaman yang ditanam.");
+        } else {
+            System.out.println("Tanaman yang telah ditanam:");
+            for (Tanaman tanaman : tanamanDitanam) {
+                System.out.println("- " + tanaman.getNama());
+            }
+        }
+    }
+
+    public void tampilkanInventoriAlat() {
+        if (inventoriAlat.isEmpty()) {
+            System.out.println("Inventori alat kosong.");
+        } else {
+            System.out.println("Alat dalam inventori:");
+            for (Alat alat : inventoriAlat) {
+                System.out.println("- " + alat.getNama());
+            }
+        }
+    }
+
+    public ArrayList<Tanaman> getTanamanDipanen() {
+        return tanamanDipanen; // Return the list of harvested plants
+    }
+
+    public ArrayList<Tanaman> getInventoriTanaman() {
+        return inventoriTanaman;
+    }
+
+    public ArrayList<Tanaman> getTanamanDitanam() { // Method to get planted plants
+        return tanamanDitanam;
+    }
+
+    public void tambahUang(int jumlah) {
+        uang += jumlah; // Add money to the player's account
+    }
+
+    public int getUang() {
+        return uang; // Return the current amount of money
     }
 }

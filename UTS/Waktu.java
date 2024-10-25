@@ -1,17 +1,21 @@
-package UTS;
+package uts1;
 
 public class Waktu {
-  private int hari;
+    private int hari;
 
-  public Waktu() {
-      this.hari = 1;
-  }
+    public Waktu() {
+        this.hari = 1;
+    }
 
-  public void lewatkanHari() {
-      hari++;
-  }
+    public void lewatkanHari() {
+        hari++;
+    }
 
-  public String getWaktu() {
-      return "Hari ke-" + hari;
-  }
+    public String getWaktu() {
+        return "Hari ke-" + hari;
+    }
+
+    public int getHari() {
+        return hari;
+    }
 }
